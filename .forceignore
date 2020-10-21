@@ -10,3 +10,9 @@ package.xml
 
 # LWC Jest
 **/__tests__/**
+
+#profiles
+**/.profile-meta.xml
+
+##permission sets
+**/.permissionset-meta.xml
