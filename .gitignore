@@ -35,3 +35,9 @@ ehthumbs.db
 $RECYCLE.BIN/
 force-app/main/default/profiles/Admin.profile-meta.xml
 force-app/main/default/permissionsets/sfdc_chatbot_service_permset.permissionset-meta.xml
+
+# MDAPI files
+mdapi/*
+
+force-app/main/default/permissionsets/sfdc_chatbot_service_permset.permissionset
+force-app/main/default/profiles/Admin.profile

@@ -9,9 +9,13 @@ public with sharing class FinDockPaymentAPI_GetPaymentMethods {
 		RestContext.response = res; 
 		req.requestURI = URL.getSalesforceBaseUrl().toExternalForm()+'/services/apexrest/v2/PaymentMethods';
 		req.httpMethod = 'GET';
-		cpm.API_PaymentMethod_V2.getPaymentMethods();
+        cpm.API_PaymentMethod_V2.getPaymentMethods();
+        System.debug('## response is in: '+res.responseBody.toString());
         PaymentMethodResponse pmResponse = (PaymentMethodResponse)JSON.deserialize(res.responseBody.toString(), PaymentMethodResponse.class);
-		List<String> pmValues = new List<String>();
+        if(pmResponse == null || pmResponse.PaymentMethods == null) {
+            throw new InvocableAPIException('No configured payment methods found');
+        }
+        List<String> pmValues = new List<String>();
         for(PaymentMethod pm : pmResponse.PaymentMethods) {
             pmValues.add(pm.Name);
         }
@@ -34,4 +38,6 @@ public with sharing class FinDockPaymentAPI_GetPaymentMethods {
         public Boolean IsDefault;
         public Boolean SupportsRecurring;
     }
+
+    public class InvocableAPIException extends Exception {}
 }
