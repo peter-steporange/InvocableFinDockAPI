@@ -46,13 +46,15 @@ public with sharing class FinDockPaymentAPI_CreateIntent {
         if(reqObject.contactId != null) { //if we have a contact ID, lets use that.
             s += '"Id":"'+reqObject.contactId+'"';
         } else { //if we don't have a contact id, lets use the lastname and email 
+            s += '"SalesforceFields": {';
             s += '"LastName":"'+reqObject.lastName+'",'; 
             s += '"Email":"'+reqObject.email+'"';
             if(reqObject.firstName != null) { //and firstname if we have it.
                 s += ',"FirstName":"'+reqObject.firstName+'"';
             }
+            s += '        }'; //close contact SalesforceFields block
         }
-		s += '        }'; //close contact block
+        s += '        }'; //close contact block
 		s += '    },'; //close payer block
 		s += '    "OneTime":{';
 		s += '        "Amount":'+reqObject.selectedAmount+'';
