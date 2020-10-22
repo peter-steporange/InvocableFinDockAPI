@@ -11,7 +11,9 @@ package.xml
 # LWC Jest
 **/__tests__/**
 
-
+# Ignore profiles and permission sets
+force-app\main\default\profiles\**
+force-app\main\default\permissionsets\**
 
 ## md api
 mdapi/*
