@@ -61,7 +61,12 @@ public with sharing class FinDockPaymentAPI_CreateIntent {
 		s += '    },';
 		s += '    "PaymentMethod":{';
 		s += '        "Name":"'+reqObject.selectedPaymentMethod+'"';
-		s += '    }';
+        s += '    }';
+        if(reqObject.campaignId != null) {
+            s += '"SalesforceFields": {';
+            s += '"cpm__campaign__c": "'+reqObject.campaignId+'"';
+            s += '}';
+        }
 		s += '}';
         return s;
     }
@@ -87,6 +92,9 @@ public with sharing class FinDockPaymentAPI_CreateIntent {
         
         @InvocableVariable(label='Email' description='If no ID is provided, this is the Email for the donor record' required=false)
         public String email;
+
+        @InvocableVariable(label='Campaign' description='Campaign Record Id to link the donation to' required=false)
+        public Id campaignId;
         
         @InvocableVariable(label='Amount' description='The Amount of the donation' required=false)
         public Double selectedAmount;
