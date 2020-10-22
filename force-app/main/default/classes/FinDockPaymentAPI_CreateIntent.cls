@@ -37,6 +37,7 @@ public with sharing class FinDockPaymentAPI_CreateIntent {
      * This method creates a JSON request from the request object.
      */
     public static String generateJSON(PaymentAPIRequest reqObject) {
+        reqObject = fixRequest(reqObject);
         String s = '';
 		s += '{';
 		s += '    "SuccessURL":"'+reqObject.SuccessURL+'",';
@@ -62,13 +63,23 @@ public with sharing class FinDockPaymentAPI_CreateIntent {
 		s += '    "PaymentMethod":{';
 		s += '        "Name":"'+reqObject.selectedPaymentMethod+'"';
         s += '    }';
-        if(reqObject.campaignId != null) {
-            s += '"SalesforceFields": {';
+        if(reqObject.campaignId != null || reqObject.campaign != null) {
+            if(reqObject.campaignId == null) {
+                reqObject.campaignId = reqObject.campaign.Id;
+            }
+            s += ',"SalesforceFields": {';
             s += '"cpm__campaign__c": "'+reqObject.campaignId+'"';
             s += '}';
         }
 		s += '}';
         return s;
+    }
+
+    private static PaymentAPIRequest fixRequest(PaymentAPIRequest req) {
+        if(req.selectedAmount == null && req.textAmount != null) {
+            req.selectedAmount = Double.valueOf(req.textAmount);
+        }
+        return req;
     }
 
     /**
@@ -93,11 +104,17 @@ public with sharing class FinDockPaymentAPI_CreateIntent {
         @InvocableVariable(label='Email' description='If no ID is provided, this is the Email for the donor record' required=false)
         public String email;
 
-        @InvocableVariable(label='Campaign' description='Campaign Record Id to link the donation to' required=false)
+        @InvocableVariable(label='CampaignId' description='Campaign Record Id to link the donation to' required=false)
         public Id campaignId;
+
+        @InvocableVariable(label='Campaign Object' description='Campaign Record to link the donation to' required=false)
+        public Campaign campaign;
         
         @InvocableVariable(label='Amount' description='The Amount of the donation' required=false)
         public Double selectedAmount;
+
+        @InvocableVariable(label='StringAmount' description='String for amount if the stupid system needs it.' required=false)
+        public String textAmount;
         
         @InvocableVariable(label='Payment Method' description='The payment method to be used in this transaction' required=false)
         public String selectedPaymentMethod;
