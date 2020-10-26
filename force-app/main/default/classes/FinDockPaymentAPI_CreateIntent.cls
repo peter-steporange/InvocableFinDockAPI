@@ -41,29 +41,35 @@ public with sharing class FinDockPaymentAPI_CreateIntent {
         String s = '';
 		s += '{';
 		s += '    "SuccessURL":"'+reqObject.SuccessURL+'",';
-		s += '    "FailureURL":"'+reqObject.FailureURL+'",';
-		s += '    "Payer":{';
-        s += '        "Contact":{';
-        if(reqObject.contactId != null) { //if we have a contact ID, lets use that.
-            s += '"Id":"'+reqObject.contactId+'"';
-        } else { //if we don't have a contact id, lets use the lastname and email 
-            s += '"SalesforceFields": {';
-            s += '"LastName":"'+reqObject.lastName+'",'; 
-            s += '"Email":"'+reqObject.email+'"';
-            if(reqObject.firstName != null) { //and firstname if we have it.
-                s += ',"FirstName":"'+reqObject.firstName+'"';
+        s += '    "FailureURL":"'+reqObject.FailureURL+'",';
+        if(reqObject.installmentID == null) { //we don't need to include payer info if there is an installment id.
+            s += '    "Payer":{';
+            s += '        "Contact":{';
+            if(reqObject.contactId != null) { //if we have a contact ID, lets use that.
+                s += '"Id":"'+reqObject.contactId+'"';
+            } else { //if we don't have a contact id, lets use the lastname and email 
+                s += '"SalesforceFields": {';
+                s += '"LastName":"'+reqObject.lastName+'",'; 
+                s += '"Email":"'+reqObject.email+'"';
+                if(reqObject.firstName != null) { //and firstname if we have it.
+                    s += ',"FirstName":"'+reqObject.firstName+'"';
+                }
+                s += '        }'; //close contact SalesforceFields block
             }
-            s += '        }'; //close contact SalesforceFields block
+            s += '        }'; //close contact block
+            s += '    },'; //close payer block
         }
-        s += '        }'; //close contact block
-		s += '    },'; //close payer block
 		s += '    "OneTime":{';
-		s += '        "Amount":'+reqObject.selectedAmount+'';
+        if(reqObject.installmentID != null) {
+            s += '        "Id":"'+reqObject.installmentID+'"';
+        } else {
+            s += '        "Amount":'+reqObject.selectedAmount+'';
+        }
 		s += '    },';
 		s += '    "PaymentMethod":{';
 		s += '        "Name":"'+reqObject.selectedPaymentMethod+'"';
         s += '    }';
-        if(reqObject.campaignId != null || reqObject.campaign != null) {
+        if(reqObject.installmentID == null && (reqObject.campaignId != null || reqObject.campaign != null)) { //only include campaign id if installment id isn't set, and campaign or id is.
             if(reqObject.campaignId == null) {
                 reqObject.campaignId = reqObject.campaign.Id;
             }
@@ -71,7 +77,8 @@ public with sharing class FinDockPaymentAPI_CreateIntent {
             s += '"cpm__campaign__c": "'+reqObject.campaignId+'"';
             s += '}';
         }
-		s += '}';
+        s += '}';
+        System.debug('## JSON constructed: '+s);
         return s;
     }
 
@@ -86,6 +93,9 @@ public with sharing class FinDockPaymentAPI_CreateIntent {
      * The parameter class used to pass data to the startPaymentFlow method. 
      */
     public class PaymentAPIRequest {
+        @InvocableVariable(label='Installment ID' description='To initiate a payment for an existing installment, provide the id here' required=false)
+        public Id installmentID;
+
         @InvocableVariable(label='Contact ID' description='The SF Record ID for the contact making the donation' required=false)
         public Id contactId;
         

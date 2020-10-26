@@ -83,6 +83,42 @@ private with sharing class FinDockPaymentAPI_CreateIntent_TEST {
     }
 
     /**
+     * when we initiate an api call with an existing installment we should expect to get a redirectURL for the testPSP package.
+     */
+    @isTest
+    static void testPaymentIntentCallWithInstallmentID() {
+        Account a = new Account(Name = 'TestAccount');
+        insert a;
+        Contact c = new Contact(LastName='Tester', AccountId = a.Id);
+        insert c;
+        cpm__Installment__c installment = new cpm__Installment__c(
+            cpm__Contact__c = c.Id, 
+            cpm__Amount__c = 25,
+            cpm__Amount_Open__c = 25,
+            cpm__Due_Date__c = System.today(),
+            cpm__Bank_Statement_Description__c = 'Test'
+            );
+        insert installment;
+        FinDockPaymentAPI_CreateIntent.PaymentAPIRequest requestObject = new FinDockPaymentAPI_CreateIntent.PaymentAPIRequest();
+        requestObject.installmentId = installment.Id;
+        requestObject.SuccessURL = 'https://success.nl';
+        requestObject.FailureURL = 'https://failed.nl';
+        requestObject.selectedPaymentMethod = 'CreditCard';
+
+        List<FinDockPaymentAPI_CreateIntent.PaymentAPIRequest> paramList = new List<FinDockPaymentAPI_CreateIntent.PaymentAPIRequest>();
+        paramList.add(requestObject);
+
+        Test.startTest();
+        List<String> responseList = FinDockPaymentAPI_CreateIntent.startPaymentFlow(paramList);
+        if(responseList.size() > 0) {
+            System.assertNotEquals(null, responseList[0], 'No RedirectURL found.');
+        } else {
+            System.assert(false);
+        }
+        Test.stopTest();
+    }
+
+    /**
      * when we initiate an api call we should expect to get a redirectURL for the testPSP package.
      * This time there is no contact ID, we insert firstname, lastname and email.
      */
